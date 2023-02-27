@@ -197,6 +197,9 @@ func TestRenderTemplateParams(t *testing.T) {
 
 func TestRenderTemplateParamsGoTemplate(t *testing.T) {
 
+	// Used to test env var substitution
+	t.Setenv("TEST_VAR", "TESTING_ENV_VAR")
+
 	// Believe it or not, this is actually less complex than the equivalent solution using reflection
 	fieldMap := map[string]func(app *argoappsv1.Application) *string{}
 	fieldMap["Path"] = func(app *argoappsv1.Application) *string { return &app.Spec.Source.Path }
@@ -397,6 +400,22 @@ func TestRenderTemplateParamsGoTemplate(t *testing.T) {
 			expectedVal: `"`,
 			params: map[string]interface{}{
 				"quote": `"`,
+			},
+		},
+		{
+			name:        "env",
+			fieldVal:    `{{ env "TEST_VAR" }}`,
+			expectedVal: `TESTING_ENV_VAR`,
+			params: map[string]interface{}{
+				"env": `TESTING_ENV_VAR`,
+			},
+		},
+		{
+			name:        "expandenv",
+			fieldVal:    `{{ expandenv "is $TEST_VAR" }}`,
+			expectedVal: `is TESTING_ENV_VAR`,
+			params: map[string]interface{}{
+				"expandenv": `is TESTING_ENV_VAR`,
 			},
 		},
 		{
