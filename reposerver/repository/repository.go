@@ -1418,11 +1418,11 @@ func newEnv(q *apiclient.ManifestRequest, revision string) *v1alpha1.Env {
 // replaceEnvVarsInManifest replaces all env vars in the manifest with values from matched
 // env vars (with the prefix ARGOCD_ENV)
 func replaceEnvVarsInManifest(manifest []byte) []byte {
-	envs := getArgoUserEnvVars()
+	envVars := getArgoUserEnvVars()
 
 	stringManifest := string(manifest)
-	for k, v := range envs {
-		stringManifest = strings.Replace(stringManifest, fmt.Sprintf("${%s}", k), v, -1)
+	for k, v := range envVars {
+		stringManifest = strings.Replace(stringManifest, fmt.Sprintf("$%s", k), v, -1)
 	}
 	return []byte(stringManifest)
 }
@@ -1430,12 +1430,10 @@ func replaceEnvVarsInManifest(manifest []byte) []byte {
 // getArgoUserEnvVars returns a map of all env vars that start with ARGOCD_ENV
 func getArgoUserEnvVars() map[string]string {
 	envVars := make(map[string]string)
-	log.Debugf("all env vars: %v", os.Environ())
 	for _, envVar := range os.Environ() {
 		envVarSplit := strings.Split(envVar, "=")
 
 		if strings.HasPrefix(envVarSplit[0], allowedEnvVarPrefix) {
-			log.Debugf("Found matching env var: %s", envVarSplit[0])
 			envVars[envVarSplit[0]] = envVarSplit[1]
 		}
 	}
